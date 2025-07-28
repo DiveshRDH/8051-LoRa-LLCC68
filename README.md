@@ -1,4 +1,4 @@
-# LoRa Library for LLCC68
+# LoRa Library for LLCC68/SX1261/1262
 
 A lightweight library for interfacing the LLCC68 LoRa module with Nuvoton 8051-based microcontrollers, specifically the MS51 series. Supports LoRa communication at 915 MHz for transmitting and receiving packets.
 
@@ -73,5 +73,7 @@ void main(void) {
 - Ensure proper SPI and GPIO setup for your hardware.
 - Refer to the LLCC68 datasheet for command and register details.
 
-## License
-MIT License. See `LICENSE` for details.
+### Built with ❤️ by **DiveshRDH**
+
+Want more help? Reach out or fork and improve this repo!
+
