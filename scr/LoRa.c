@@ -173,7 +173,7 @@ unsigned long frequencyToPLL(unsigned long rfFreq) {
 void SetRfFrequency(void) {
     pllFrequency = frequencyToPLL(freq_hz);
     NSS = 0;
-    Spi_Write_Byte(0x0D);
+    Spi_Write_Byte(0x86);
     Spi_Write_Byte(0x08);
     Spi_Write_Byte(0x60);
     Spi_Write_Byte((pllFrequency >> 24) & 0xFF);
