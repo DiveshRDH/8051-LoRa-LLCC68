@@ -1,45 +1,72 @@
-#ifndef LORA_H
-#define LORA_H
+#ifndef __LORA_H__
+#define __LORA_H__
 
-#include "MS51_16K.h"
 #include <stdio.h>
+#include <string.h>
+#include "MS51_16K.H"
+
+// Pin mode definitions
+#define PUSH_PULL_MODE    0
+#define INPUT_MODE        1
+#define QUASI_MODE        2
+#define OPEN_DRAIN_MODE   3
+
+#define SET_PIN_MODE(port, pin, mode) \
+  if ((mode) == PUSH_PULL_MODE) { clr_P##port##M1_##pin; set_P##port##M2_##pin; } \
+  else if ((mode) == INPUT_MODE) { set_P##port##M1_##pin; clr_P##port##M2_##pin; } \
+  else if ((mode) == QUASI_MODE) { clr_P##port##M1_##pin; clr_P##port##M2_##pin; } \
+  else if ((mode) == OPEN_DRAIN_MODE) { set_P##port##M1_##pin; set_P##port##M2_##pin; }
 
 // Pin definitions
-#define NSS     P15    // SPI Slave Select
-#define DIO1    P11    // DIO1 for interrupts
-#define RESET   P13    // Reset pin
+sbit NSS = P1^5;    // SPI Slave Select (Chip Select for LoRa)
+sbit DIO1 = P1^1;   // DIO1 for interrupts
+sbit RESET = P1^3;  // Reset pin
+
+// Preset definitions
+#define PRESET_DEFAULT   0
+#define PRESET_LONGRANGE 1
+#define PRESET_FAST      2
+#define CUSTOM           3
+#define CUSTOM2          4
 
 // Function prototypes
 void UART_Init(void);
 void Spi_Init(void);
-void Delay(unsigned char delay);
-void Reset(void);
-void SetStandby(void);
-void SetModulationParams(void);
-void SetPacketParams(void);
-void WriteBuffer(void);
-void SetTx(void);
-void getStatus(void);
-void SetRX(void);
-void ClearIrqStatus(void);
-void GetRxBufferStatus(void);
-void handshake(void);
-void SetDIO2AsRfSwitchCtrl(void);
-unsigned long frequencyToPLL(unsigned long rfFreq);
-void SetRfFrequency(void);
-void SetPacketType(void);
-void StopTimerOnPreamble(void);
-void SetPaConfig(void);
-void SetTxParams(void);
-void SetLoRaSymbNumTimeout(void);
-void SetDioIrqParams(void);
-void GetIrqStatus(unsigned int *irqStatus);
-void setModeReceive(void);
-void lora_receive_async(void);
-void Essensial(void);
-void begin(void);
-void LoRa_Send(char* msg, unsigned char len);
-unsigned char LoRa_Receive(char* buf, unsigned char buffMaxLen);
-int lora_receive_blocking(unsigned char *buf, int buffMaxLen);
+void Spi_Write_Byte(unsigned char dat);
+unsigned char Spi_Read_Byte(unsigned char dummy);
+void Delay_ms(unsigned int ms);
+unsigned long frequencyToPLL(long rfFreq);
+void Lora_reset(void);
+unsigned char Lora_sanityCheck(void);
+unsigned char Lora_waitForRadioCommandCompletion(unsigned long timeout_ms);
+void Lora_configureRadioEssentials(void);
+unsigned char Lora_begin(void);
+void Lora_transmit(unsigned char *PKT, int dataLen);
+void Lora_setModeReceive(void);
+void Lora_setModeStandby(void);
+int Lora_receive_async(unsigned char *buff, int buffMaxLen);
+int Lora_receive_blocking(unsigned char *buff, int buffMaxLen, unsigned long timeout_ms);
+void Lora_updateRadioFrequency(void);
+unsigned char Lora_configSetFrequency(long frequencyInHz);
+void Lora_updateModulationParameters(void);
+unsigned char Lora_configSetPreset(int preset);
+unsigned char Lora_configSetBandwidth(unsigned char bw);
+unsigned char Lora_configSetCodingRate(unsigned char cr);
+unsigned char Lora_configSetSpreadingFactor(unsigned char sf);
+void delay(unsigned char timer);
 
-#endif // LORA_H
+// Global configuration variables
+extern xdata unsigned char spiBuff[256];
+extern unsigned long pllFrequency;
+extern unsigned long freq_hz;
+extern unsigned char spreadingFactor;
+extern unsigned char bandwidth;
+extern unsigned char codingRate;
+extern unsigned char lowDataRateOptimize;
+extern unsigned long transmitTimeout;
+extern unsigned char inReceiveMode;
+extern int rssi;
+extern int snr;
+extern int signalRssi;
+
+#endif // __LORA_H__
